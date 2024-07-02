@@ -62,5 +62,20 @@ namespace Marten
 
             Connected = false;
         }
+
+        public static async void CreateMatch()
+        {
+
+        }
+
+        public static async void JoinMatch()
+        {
+
+        }
+
+        public static async void LeaveMatch()
+        {
+
+        }
     }
 }
