@@ -1,2 +1,0 @@
-- NetSpawner class which handles spawning between clients.
-    - The NetSpawner has a static queue which is what holds the information about what needs to be spawned. The queue is processed by an instance of the node, which is preferably a singleton.
