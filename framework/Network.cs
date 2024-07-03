@@ -19,13 +19,13 @@ namespace Marten
         public static Nakama.ISession Session { get; private set; } = null;
         public static Nakama.ISocket Socket { get; private set; } = null;
         public static Account Account { get; private set; } = null;
-        public static Nakama.IMatch Match { get; private set; } = null;
+        public static Match Match { get; private set; } = null;
 
         public static async Task<bool> Connect(string serverIp, AuthData authData, int port = 7350)
         {
             if (Connected)
             {
-                GD.PrintErr("Error connecting to server: already connected!");
+                GD.PrintErr("Error connecting to server: already connected.");
                 return false;
             }
 
@@ -65,17 +65,46 @@ namespace Marten
 
         public static async void CreateMatch()
         {
+            if (!Connected)
+                return;
+            if (Match is not null)
+            {
+                GD.PrintErr("Error creating match: already connected to a match.");
+                return;
+            }
 
+            Match = await Match.Create();
+            if (Match is not null)
+                JoinedMatch.Invoke();
         }
 
-        public static async void JoinMatch()
+        public static async void JoinMatch(string id)
         {
+            if (!Connected)
+                return;
+            if (Match is not null)
+            {
+                GD.PrintErr("Error joining match: already connected to a match.");
+                return;
+            }
 
+            Match = await Match.Join(id);
+            if (Match is not null)
+                JoinedMatch.Invoke();
         }
 
-        public static async void LeaveMatch()
+        public static void LeaveMatch()
         {
+            if (!Connected)
+                return;
+            if (Match is null)
+            {
+                GD.PrintErr("Error leaving match: not connected to a match.");
+                return;
+            }
 
+            Match = null;
+            LeftMatch.Invoke();
         }
     }
 }

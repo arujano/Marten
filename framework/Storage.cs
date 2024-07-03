@@ -27,6 +27,8 @@ namespace Marten
         public string EncodedData;
     }
 
+    public delegate void SyncedStorageHandler();
+
     /// <summary>
     /// Represents a data object contained in the server.
     /// Can optionally be synchronized automatically when the network is connected to a match.
@@ -34,6 +36,8 @@ namespace Marten
     /// <typeparam name="T">The type of data this object contains.</typeparam>
     public class NetStorage<T> where T : IStorageData
     {
+        public event SyncedStorageHandler SyncedStorage;
+
         public Nakama.StorageObjectId Id { get; private set; }
         public T Data { get; set; }
         /// <summary>Determines if this storage object should sync whenever it is written to.</summary>
@@ -90,6 +94,8 @@ namespace Marten
 
             Id.Version = result.Objects.First().Version;
             Data = JsonConvert.DeserializeObject<T>(result.Objects.First().Value);
+
+            SyncedStorage.Invoke();
         }
 
         /// <summary>
@@ -123,7 +129,7 @@ namespace Marten
                     EncodedData = encodedData,
                 };
 
-                await Network.Socket.SendMatchStateAsync(Network.Match.Id, NetCodes.SyncStorage, JsonConvert.SerializeObject(data));
+                await Network.Socket.SendMatchStateAsync(Network.Match.Id(), NetCodes.SyncStorage, JsonConvert.SerializeObject(data));
             }
         }
 
@@ -138,6 +144,8 @@ namespace Marten
 
             Id.Version = data.Id.Version;
             Data = JsonConvert.DeserializeObject<T>(data.EncodedData);
+
+            SyncedStorage.Invoke();
         }
     }
 }
